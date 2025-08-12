@@ -1,0 +1,64 @@
+/* :root는 CSS의 전역 변수 같은 개념입니다.
+  여기서 부트스트랩의 기본 색상 변수(--bs-primary)를 
+  우리가 원하는 색상으로 덮어씌우는 겁니다.
+*/
+:root {
+    /* 부트스트랩의 기본 '파란색'을 우리가 쓸 '전술 블루'로 변경 */
+    --bs-primary: #00aaff; 
+    --bs-primary-rgb: 0, 170, 255; /* RGB 값도 함께 변경해줘야 합니다. */
+
+    /* 기본 배경색을 부트스트랩 다크모드보다 조금 더 어둡게 설정 */
+    --bs-body-bg: #1a1a1a; 
+}
+
+/* 리스트 그룹 아이템의 배경색을 카드 배경색과 유사하게 맞춤 */
+.list-group-item {
+    background-color: #2b2b2b;
+    border-color: #444; /* 테두리 색도 살짝 조정 */
+}
+/* landing.html 전용 스타일 */
+.landing-container {
+    display: flex; /* Flexbox 레이아웃 사용 */
+    flex-direction: column; /* 아이템을 세로로 정렬 */
+    justify-content: center; /* 수직 중앙 정렬 */
+    align-items: center; /* 수평 중앙 정렬 */
+    width: 100%;
+    min-height: 100vh; /* 최소 높이를 화면 전체 높이로 설정 */
+    background-color: #121828; /* 이미지와 유사한 어두운 남색 배경 */
+}
+
+.landing-logo h1 {
+    font-size: 4rem; /* '대남진' 텍스트 크기 */
+    font-weight: bold;
+    color: #ffd700; /* 금색 */
+    margin-bottom: 30px;
+}
+
+.landing-logo .star-icon {
+    font-size: 3.5rem; /* 별 아이콘 크기 */
+    color: #ffd700;
+    /* 별이 부드럽게 깜빡이는 애니메이션 효과 */
+    animation: pulse 2s infinite ease-in-out;
+}
+
+.start-button {
+    padding: 12px 24px;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+/* 별이 깜빡이는 애니메이션 정의 */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.7;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0.7;
+    }
+}

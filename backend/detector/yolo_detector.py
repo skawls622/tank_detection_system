@@ -56,3 +56,29 @@ def detect_tanks(video_path, save_path=None):
 
     cap.release()
     return detections
+
+
+# 탐지 결과를 Flask에서 바로 활용하려면, 추가 유틸로 아래 함수 추천
+
+def detect_and_return_summary(video_path):
+    """
+    탐지 후 요약 결과 리턴
+    예시:
+    - 첫 번째 탐지된 전차 이름
+    - 신뢰도 평균
+    - 탐지 프레임 수
+    """
+    results = detect_tanks(video_path)
+    if not results:
+        return {"status": "No Detection"}
+
+    tank_names = [r['label'] for r in results]
+    top_label = max(set(tank_names), key=tank_names.count)
+    confidences = [r['confidence'] for r in results if r['label'] == top_label]
+
+    return {
+        "status": "Detected",
+        "top_label": top_label,
+        "mean_conf": round(sum(confidences) / len(confidences), 3),
+        "frames_detected": len(set([r['frame'] for r in results]))
+    }

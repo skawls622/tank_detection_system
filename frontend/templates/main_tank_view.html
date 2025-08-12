@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block title %}전차 관제 화면{% endblock %}
+
+{% block content %}
+<header class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom border-primary">
+    <h1 class="h3">
+        <span class="text-primary fw-bold">전차 #K-201</span> 관제 화면
+    </h1>
+    <div class="user-info">
+        <button class="btn btn-outline-primary btn-sm me-3" data-bs-toggle="modal" data-bs-target="#iffConfigModal">
+            피아식별 설정
+        </button>
+        <span class="me-3">병사 홍길동 (TEST01)</span>
+        <a href="#" class="btn btn-danger btn-sm">로그아웃</a>
+    </div>
+</header>
+
+<div class="row g-3">
+    <div class="col-12">
+        <div class="card bg-black">
+            <div class="card-header fw-bold">RCWS 실시간 영상</div>
+            <div class="card-body d-flex align-items-center justify-content-center" style="min-height: 50vh;">
+                <p class="text-secondary">[영상 스트림 표시 영역]</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header text-warning fw-bold">AI 대응 추천</div>
+            <div class="card-body" id="ai-recommendation-content" style="min-height: 25vh;">
+                <p class="text-success"><strong>[상태]</strong> 모든 시스템 정상.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header fw-bold">실시간 탐지 로그</div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush" id="realtime-log-list" style="height: 25vh; overflow-y: auto;">
+                    <li class="list-group-item text-secondary">시스템 준비 완료.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="iffConfigModal" tabindex="-1" aria-labelledby="iffConfigModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="iffConfigModalLabel">피아식별(IFF) 규칙 설정</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row align-items-center">
+            <div class="col-5">
+                <h6 class="text-center text-success">아군 (FRIEND)</h6>
+                <ul class="list-group">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">K-2 흑표 <button class="btn btn-outline-secondary btn-sm">&gt;</button></li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">K-1A2 <button class="btn btn-outline-secondary btn-sm">&gt;</button></li>
+                </ul>
+            </div>
+            <div class="col-2 text-center">
+                <i class="bi bi-arrow-left-right">↔</i>
+            </div>
+            <div class="col-5">
+                <h6 class="text-center text-danger">적군 (ENEMY)</h6>
+                <ul class="list-group">
+                    <li class="list-group-item d-flex justify-content-between align-items-center"><button class="btn btn-outline-secondary btn-sm">&lt;</button> T-90M</li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center"><button class="btn btn-outline-secondary btn-sm">&lt;</button> T-80U</li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center"><button class="btn btn-outline-secondary btn-sm">&lt;</button> BMP-3</li>
+                </ul>
+            </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+        <button type="button" class="btn btn-primary">변경사항 저장</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+    // 페이지 로딩이 완료된 후에 모든 스크립트를 실행합니다.
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // ===================================
+        // 1. 실시간 탐지 로그 기능
+        // ===================================
+        const logList = document.getElementById('realtime-log-list');
+        const mockLogs = [
+            { model: 'T-80U', iff: 'ENEMY', dist: '1.4km' },
+            { model: 'K-2', iff: 'FRIEND', dist: '0.9km' },
+            { model: 'BMP-3', iff: 'ENEMY', dist: '2.1km' },
+        ];
+
+        setInterval(() => {
+            const randomLog = mockLogs[Math.floor(Math.random() * mockLogs.length)];
+            const newLogItem = document.createElement('li');
+            newLogItem.className = 'list-group-item';
+            const time = new Date().toLocaleTimeString();
+            const iffClass = randomLog.iff === 'ENEMY' ? 'text-danger' : 'text-success';
+            
+            newLogItem.innerHTML = `[${time}] <span class="fw-bold ${iffClass}">${randomLog.model}</span> 탐지 (거리: ${randomLog.dist})`;
+            
+            if (logList.firstChild && logList.firstChild.classList.contains('text-secondary')) {
+                logList.removeChild(logList.firstChild); // "준비 완료" 메시지 삭제
+            }
+            logList.prepend(newLogItem);
+            if (logList.children.length > 10) {
+                logList.removeChild(logList.lastChild);
+            }
+        }, 5000);
+
+        // ===================================
+        // 2. 피아식별(IFF) 모달 상호작용 기능
+        // ===================================
+        const iffModal = document.getElementById('iffConfigModal');
+        const friendList = iffModal.querySelector('.text-success + .list-group');
+        const enemyList = iffModal.querySelector('.text-danger + .list-group');
+
+        // 항목을 이동시키는 함수
+        function moveIffItem(event) {
+            // 클릭된 버튼이 '>' 버튼인지 '<' 버튼인지 확인
+            const isMovingToEnemy = event.target.textContent === '>';
+            
+            // 버튼의 부모인 li 요소를 찾음
+            const listItem = event.target.closest('.list-group-item');
+
+            if (isMovingToEnemy) {
+                // 적군 리스트로 이동
+                event.target.textContent = '<'; // 버튼 모양 변경
+                enemyList.appendChild(listItem);
+            } else {
+                // 아군 리스트로 이동
+                event.target.textContent = '>'; // 버튼 모양 변경
+                friendList.appendChild(listItem);
+            }
+        }
+        
+        // 모달 안의 모든 버튼에 클릭 이벤트 추가
+        iffModal.querySelectorAll('.list-group-item button').forEach(button => {
+            button.addEventListener('click', moveIffItem);
+        });
+    });
+</script>
+{% endblock %}
